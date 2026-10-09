@@ -1,1 +1,586 @@
-# Repair-virsion-1
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AtoZ Mobile Repairing</title>
+<style>
+  :root{
+    --bg:#F4F6F8;
+    --card:#FFFFFF;
+    --line:#E4E8EC;
+    --ink:#1B232B;
+    --ink-dim:#6B7885;
+    --navy:#1E3A5F;
+    --blue:#2E7FD6; --blue-dim:#E8F1FC;
+    --amber:#E8963C; --amber-dim:#FDF0E1;
+    --purple:#8B6FCB; --purple-dim:#F0EBFA;
+    --green:#3DAA6B; --green-dim:#E5F5EC;
+    --teal:#2FA895; --teal-dim:#E3F6F3;
+    --red:#D9534F; --red-dim:#FBEAEA;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --mono: 'SFMono-Regular', Consolas, monospace;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--font); min-height:100vh; padding-bottom:78px; }
+
+  header{ padding:16px 18px 14px; background:var(--card); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:10px; }
+  header .logo{ width:38px; height:38px; border-radius:10px; background:var(--navy); display:flex; align-items:center; justify-content:center; font-size:18px; flex:0 0 auto; }
+  header h1{ margin:0; font-size:16.5px; font-weight:700; }
+  header .sub{ color:var(--ink-dim); font-size:11.5px; }
+  header .back{ font-size:20px; color:var(--ink); cursor:pointer; padding:2px 4px; }
+
+  main{ padding:16px 18px 8px; max-width:680px; margin:0 auto; }
+
+  /* Dashboard */
+  .greet{ background:linear-gradient(135deg, var(--navy), #2A4E7A); color:#fff; border-radius:14px; padding:16px 18px; margin-bottom:16px; }
+  .greet .h{ font-size:15px; font-weight:700; }
+  .greet .s{ font-size:12.5px; opacity:0.85; margin-top:2px; }
+
+  .ov-label{ display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700; color:var(--ink-dim); margin-bottom:10px; }
+  .grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:16px; }
+  .stat-card{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 10px; cursor:pointer; }
+  .stat-card .ic{ width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; margin-bottom:8px; }
+  .stat-card .n{ font-size:19px; font-weight:700; font-family:var(--mono); }
+  .stat-card .l{ font-size:10.5px; color:var(--ink-dim); margin-top:1px; }
+  .ic.pending{ background:var(--amber-dim); color:var(--amber); }
+  .ic.repairing{ background:var(--blue-dim); color:var(--blue); }
+  .ic.parts{ background:var(--purple-dim); color:var(--purple); }
+  .ic.ready{ background:var(--green-dim); color:var(--green); }
+  .ic.delivered{ background:var(--teal-dim); color:var(--teal); }
+  .ic.total{ background:#EEF1F4; color:var(--ink-dim); }
+
+  .money-row{ display:flex; gap:10px; margin-bottom:16px; }
+  .money-card{ flex:1; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:13px 14px; }
+  .money-card .n{ font-size:18px; font-weight:700; }
+  .money-card .l{ font-size:11.5px; color:var(--ink-dim); margin-top:2px; }
+  .money-card.rev .n{ color:var(--green); }
+  .money-card.pend .n{ color:var(--red); }
+
+  .search{ width:100%; padding:11px 14px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:13.5px; margin-bottom:14px; }
+  .search:focus{ outline:2px solid var(--blue); border-color:var(--blue); }
+
+  .filter-row{ display:flex; gap:8px; overflow-x:auto; margin-bottom:14px; }
+  .filter-chip{ flex:0 0 auto; padding:7px 14px; border-radius:20px; border:1px solid var(--line); background:var(--card); color:var(--ink-dim); font-size:12.5px; font-weight:600; cursor:pointer; }
+  .filter-chip.active{ background:var(--blue); color:#fff; border-color:var(--blue); }
+
+  .empty{ text-align:center; color:var(--ink-dim); padding:60px 20px; font-size:14px; }
+
+  /* Job card */
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:13px; padding:13px 15px; margin-bottom:10px; cursor:pointer; }
+  .card-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .card-left{ display:flex; gap:10px; }
+  .thumb{ width:40px; height:40px; border-radius:9px; background:#EEF1F4; display:flex; align-items:center; justify-content:center; font-size:17px; flex:0 0 auto; overflow:hidden; }
+  .thumb img{ width:100%; height:100%; object-fit:cover; }
+  .card-phone{ font-weight:700; font-size:14.5px; }
+  .card-id{ color:var(--ink-dim); font-size:11.5px; font-family:var(--mono); margin-top:1px; }
+  .card-issue{ color:var(--ink-dim); font-size:12px; margin-top:2px; }
+  .badge{ font-size:10.5px; font-weight:700; padding:4px 10px; border-radius:20px; white-space:nowrap; height:fit-content; }
+  .badge.received,.badge.diagnosis{ color:var(--amber); background:var(--amber-dim); }
+  .badge.waiting_parts{ color:var(--purple); background:var(--purple-dim); }
+  .badge.repairing{ color:var(--blue); background:var(--blue-dim); }
+  .badge.ready{ color:var(--green); background:var(--green-dim); }
+  .badge.delivered{ color:var(--teal); background:var(--teal-dim); }
+  .badge.cancelled{ color:var(--red); background:var(--red-dim); }
+  .card-time{ font-size:11px; color:var(--ink-dim); margin-top:8px; }
+
+  .fab{ position:fixed; bottom:80px; right:18px; background:var(--blue); color:#fff; border:none; border-radius:14px; width:54px; height:54px; font-size:24px; cursor:pointer; box-shadow:0 6px 16px rgba(46,127,214,0.4); }
+
+  .navbar{ position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--line); display:flex; padding:8px 0 calc(8px + env(safe-area-inset-bottom)); z-index:15; }
+  .navitem{ flex:1; text-align:center; color:var(--ink-dim); font-size:10.5px; cursor:pointer; padding:4px; }
+  .navitem .ic{ font-size:19px; display:block; margin-bottom:2px; }
+  .navitem.active{ color:var(--blue); font-weight:700; }
+
+  /* Sheets */
+  .sheet-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:20; display:none; }
+  .sheet-backdrop.open{ display:block; }
+  .sheet-screen{ position:fixed; inset:0; background:var(--bg); z-index:21; display:none; overflow-y:auto; }
+  .sheet-screen.open{ display:block; }
+
+  .field{ margin-bottom:13px; }
+  .field label{ display:block; font-size:12px; color:var(--ink-dim); margin-bottom:6px; font-weight:600; }
+  .field input, .field select, .field textarea{ width:100%; padding:11px 12px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:14.5px; font-family:var(--font); }
+  .field textarea{ resize:vertical; min-height:55px; }
+  .field input:focus, .field select:focus, .field textarea:focus{ outline:2px solid var(--blue); border-color:var(--blue); }
+  .row2{ display:flex; gap:10px; }
+  .row2 > .field{ flex:1; }
+  .section-label{ font-size:13px; font-weight:700; color:var(--navy); margin:18px 0 10px; }
+
+  .photo-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .photo-thumb{ width:64px; height:64px; border-radius:10px; overflow:hidden; position:relative; border:1px solid var(--line); }
+  .photo-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .photo-thumb .rm{ position:absolute; top:2px; right:2px; background:rgba(0,0,0,0.6); color:#fff; border-radius:50%; width:18px; height:18px; font-size:11px; display:flex; align-items:center; justify-content:center; }
+  .add-photo{ width:64px; height:64px; border-radius:10px; border:1.5px dashed var(--line); display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--ink-dim); font-size:10px; gap:3px; cursor:pointer; background:var(--card); }
+  .add-photo .ic{ font-size:18px; }
+
+  .sheet-actions{ display:flex; gap:10px; margin-top:18px; padding-bottom:20px; }
+  .btn{ padding:13px; border-radius:10px; border:none; font-size:14px; font-weight:700; cursor:pointer; flex:1; text-align:center; }
+  .btn-primary{ background:var(--blue); color:#fff; }
+  .btn-cancel{ background:var(--card); color:var(--ink-dim); border:1px solid var(--line); }
+  .btn-wa{ background:var(--green); color:#fff; }
+
+  .detail-row{ display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--line); font-size:13.5px; }
+  .detail-row span:first-child{ color:var(--ink-dim); }
+  .detail-row span:last-child{ font-weight:600; text-align:right; }
+
+  .timeline{ margin-top:8px; }
+  .tl-item{ display:flex; gap:10px; padding:7px 0; }
+  .tl-dot{ width:9px; height:9px; border-radius:50%; margin-top:5px; flex:0 0 auto; background:var(--line); }
+  .tl-dot.done{ background:var(--green); }
+  .tl-dot.current{ background:var(--blue); box-shadow:0 0 0 3px var(--blue-dim); }
+  .tl-label{ font-size:13.5px; font-weight:600; }
+  .tl-time{ font-size:11px; color:var(--ink-dim); }
+
+  .history-item{ background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:13px; }
+  .history-item .h-top{ display:flex; justify-content:space-between; font-weight:600; }
+  .history-item .h-sub{ color:var(--ink-dim); font-size:12px; margin-top:3px; }
+
+  .template-opt{ display:flex; align-items:center; gap:10px; padding:10px 0; font-size:14px; font-weight:600; color:var(--ink-dim); }
+  .template-opt.active{ color:var(--ink); }
+  .radio{ width:18px; height:18px; border-radius:50%; border:2px solid var(--line); flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
+  .radio.active{ border-color:var(--blue); }
+  .radio.active::after{ content:''; width:9px; height:9px; border-radius:50%; background:var(--blue); }
+
+  .msg-preview{ background:var(--green-dim); border-radius:12px; padding:14px 16px; font-size:13.5px; line-height:1.6; white-space:pre-wrap; color:#1B4D33; margin:12px 0 6px; }
+  .char-count{ text-align:right; font-size:11px; color:var(--ink-dim); margin-bottom:10px; }
+
+  .toast{ position:fixed; top:16px; left:50%; transform:translateX(-50%); background:var(--green); color:#fff; padding:10px 18px; border-radius:10px; font-size:13px; font-weight:600; z-index:40; display:none; box-shadow:0 4px 14px rgba(0,0,0,0.25); }
+  .toast.show{ display:block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🔧</div>
+  <div>
+    <h1>AtoZ Mobile Repairing</h1>
+    <div class="sub">Repair job manager</div>
+  </div>
+</header>
+
+<main id="mainView"></main>
+
+<button class="fab" onclick="openNewJob()">＋</button>
+
+<div class="navbar">
+  <div class="navitem" id="nav-home" onclick="goHome()"><span class="ic">🏠</span>Home</div>
+  <div class="navitem" id="nav-add" onclick="openNewJob()"><span class="ic">➕</span>Add Repair</div>
+  <div class="navitem" id="nav-all" onclick="goAll()"><span class="ic">📋</span>All Repairs</div>
+</div>
+
+<!-- ADD REPAIR SCREEN -->
+<div class="sheet-screen" id="addScreen">
+  <header><span class="back" onclick="closeAdd()">←</span><div><h1>Add New Repair</h1></div></header>
+  <main>
+    <div class="section-label">Customer Details</div>
+    <div class="field"><label>Customer Name *</label><input id="f_name" placeholder="e.g. Rahul Kumar"></div>
+    <div class="field"><label>Mobile Number (WhatsApp) *</label><input id="f_phone" type="tel" placeholder="e.g. 9876543210"></div>
+
+    <div class="section-label">Phone Details</div>
+    <div class="row2">
+      <div class="field"><label>Brand *</label>
+        <select id="f_brand">
+          <option>Samsung</option><option>Apple</option><option>Redmi</option>
+          <option>Vivo</option><option>Oppo</option><option>OnePlus</option>
+          <option>Realme</option><option>Motorola</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Model *</label><input id="f_model" placeholder="e.g. Galaxy S23"></div>
+    </div>
+    <div class="field"><label>IMEI Number (Optional)</label><input id="f_imei" placeholder="Enter IMEI number"></div>
+    <div class="row2">
+      <div class="field"><label>Phone Condition</label>
+        <select id="f_condition"><option>Good</option><option>Minor scratches</option><option>Cracked</option><option>Water damaged</option><option>Heavily damaged</option></select>
+      </div>
+      <div class="field"><label>Accessories Received</label><input id="f_accessories" placeholder="e.g. Charger, box"></div>
+    </div>
+
+    <div class="section-label">Problem / Complaint</div>
+    <div class="field"><textarea id="f_issue" placeholder="e.g. Display broken"></textarea></div>
+
+    <div class="section-label">Photos (Optional)</div>
+    <div class="photo-row" id="photoRow">
+      <div class="add-photo" onclick="document.getElementById('photoInput').click()"><span class="ic">📷</span>Add Photo</div>
+    </div>
+    <input type="file" id="photoInput" accept="image/*" capture="environment" multiple style="display:none" onchange="addPhotos(event)">
+
+    <div class="section-label">Cost & Schedule</div>
+    <div class="row2">
+      <div class="field"><label>Estimated Cost (₹)</label><input id="f_cost" type="number" placeholder="e.g. 1800"></div>
+      <div class="field"><label>Advance Paid (₹)</label><input id="f_advance" type="number" placeholder="e.g. 500"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Expected Delivery</label><input id="f_delivery" type="date"></div>
+      <div class="field"><label>Technician Assigned</label><input id="f_tech" placeholder="e.g. Imran"></div>
+    </div>
+
+    <div class="sheet-actions">
+      <button class="btn btn-primary" style="flex:1" onclick="saveJob()">Create Repair</button>
+    </div>
+  </main>
+</div>
+
+<!-- REPAIR DETAILS SCREEN -->
+<div class="sheet-screen" id="detailScreen">
+  <header><span class="back" onclick="closeDetail()">←</span><div><h1 id="detailTitle">Repair Details</h1></div></header>
+  <main id="detailContent"></main>
+</div>
+
+<!-- WHATSAPP TEMPLATE SCREEN -->
+<div class="sheet-screen" id="waScreen">
+  <header><span class="back" onclick="closeWa()">←</span><div><h1>Send WhatsApp Update</h1></div></header>
+  <main id="waContent"></main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORE_KEY='atoz_v1_jobs';
+const COUNTER_KEY='atoz_v1_counter';
+let jobs = [];
+let currentFilter = 'all';
+let activeJobId = null;
+let pendingPhotos = [];
+
+const STAGES = ['received','diagnosis','waiting_parts','repairing','ready','delivered'];
+const STAGE_LABEL = {
+  received:'Received', diagnosis:'Diagnosis', waiting_parts:'Waiting for Parts',
+  repairing:'Under Repair', ready:'Ready for Pickup', delivered:'Delivered', cancelled:'Cancelled'
+};
+
+function loadJobs(){ try{ jobs = JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); }catch(e){ jobs=[]; } }
+function persist(){ localStorage.setItem(STORE_KEY, JSON.stringify(jobs)); }
+function nextJobId(){
+  let n = parseInt(localStorage.getItem(COUNTER_KEY) || '0', 10) + 1;
+  localStorage.setItem(COUNTER_KEY, String(n));
+  return 'REP-' + new Date().getFullYear() + '-' + String(n).padStart(4,'0');
+}
+function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function todayStr(){ return new Date().toDateString(); }
+function fmtTime(ts){ return new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
+function fmtDate(ts){ return new Date(ts).toLocaleDateString([], {day:'2-digit', month:'short'}); }
+
+function goHome(){ currentFilter='home'; renderMain(); setNav('home'); }
+function goAll(){ currentFilter='all'; renderMain(); setNav('all'); }
+function setNav(which){
+  ['home','add','all'].forEach(n=>document.getElementById('nav-'+n).classList.toggle('active', n===which));
+}
+
+function renderMain(){
+  setNav(currentFilter==='home' ? 'home' : 'all');
+  const el = document.getElementById('mainView');
+  if(currentFilter==='home'){ el.innerHTML = renderDashboard(); }
+  else { el.innerHTML = renderListScreen(); }
+}
+
+function computeCounts(){
+  const c = { all: jobs.filter(j=>j.status!=='cancelled').length };
+  STAGES.concat(['cancelled']).forEach(s=>c[s]=jobs.filter(j=>j.status===s).length);
+  c.deliveredToday = jobs.filter(j=>j.status==='delivered' && j.history.some(h=>h.status==='delivered' && new Date(h.at).toDateString()===todayStr())).length;
+  return c;
+}
+
+function computeRevenue(){
+  const today = todayStr();
+  let todayRev = 0, pending = 0;
+  jobs.forEach(j=>{
+    const cost = parseFloat(j.cost)||0;
+    const advance = parseFloat(j.advance)||0;
+    if(j.status==='delivered'){
+      const deliveredAt = j.history.find(h=>h.status==='delivered');
+      if(deliveredAt && new Date(deliveredAt.at).toDateString()===today) todayRev += cost;
+    } else if(j.status!=='cancelled'){
+      pending += (cost - advance);
+    }
+  });
+  return {todayRev, pending};
+}
+
+function renderDashboard(){
+  const c = computeCounts();
+  const rev = computeRevenue();
+  return `
+    <div class="greet">
+      <div class="h">Hello, Azim! 👋</div>
+      <div class="s">Keep your customers happy — ${new Date().toLocaleDateString([], {day:'2-digit', month:'short', year:'numeric'})}</div>
+    </div>
+    <div class="ov-label"><span>Today's Overview</span></div>
+    <div class="grid">
+      <div class="stat-card" onclick="openFilteredList('received')"><div class="ic pending">⏳</div><div class="n">${c.received+c.diagnosis}</div><div class="l">Pending</div></div>
+      <div class="stat-card" onclick="openFilteredList('repairing')"><div class="ic repairing">🔧</div><div class="n">${c.repairing}</div><div class="l">Repairing</div></div>
+      <div class="stat-card" onclick="openFilteredList('waiting_parts')"><div class="ic parts">📦</div><div class="n">${c.waiting_parts}</div><div class="l">Waiting Parts</div></div>
+      <div class="stat-card" onclick="openFilteredList('ready')"><div class="ic ready">✅</div><div class="n">${c.ready}</div><div class="l">Ready</div></div>
+      <div class="stat-card" onclick="openFilteredList('delivered')"><div class="ic delivered">🚚</div><div class="n">${c.deliveredToday}</div><div class="l">Delivered Today</div></div>
+      <div class="stat-card" onclick="openFilteredList('all')"><div class="ic total">📊</div><div class="n">${c.all}</div><div class="l">Total Repairs</div></div>
+    </div>
+    <div class="money-row">
+      <div class="money-card rev"><div class="n">₹${rev.todayRev.toLocaleString()}</div><div class="l">Today's Revenue</div></div>
+      <div class="money-card pend"><div class="n">₹${rev.pending.toLocaleString()}</div><div class="l">Pending Payments</div></div>
+    </div>
+    <input class="search" id="searchBoxHome" placeholder="Search by customer, phone or repair ID..." oninput="searchFromHome(this.value)">
+    <div id="homeResults"></div>
+  `;
+}
+
+function searchFromHome(q){
+  const el = document.getElementById('homeResults');
+  if(!q.trim()){ el.innerHTML=''; return; }
+  const ql = q.toLowerCase();
+  const results = jobs.filter(j=>(j.name+' '+j.phone+' '+j.model+' '+j.brand+' '+j.id).toLowerCase().includes(ql));
+  el.innerHTML = results.length===0 ? `<div class="empty">No matches found.</div>` : results.map(renderCard).join('');
+}
+
+function openFilteredList(f){ currentFilter=f; renderMain(); setNav('all'); }
+
+function renderListScreen(){
+  const q = window._searchQ || '';
+  let filtered = jobs.filter(j=>{
+    if(currentFilter==='all' && j.status==='cancelled') return false;
+    if(currentFilter!=='all' && j.status!==currentFilter) return false;
+    if(!q) return true;
+    return (j.name+' '+j.phone+' '+j.model+' '+j.brand+' '+j.id).toLowerCase().includes(q.toLowerCase());
+  });
+  filtered.sort((a,b)=>b.createdAt-a.createdAt);
+
+  const defs = [
+    {k:'all', l:'All'}, {k:'received', l:'Pending'}, {k:'repairing', l:'Repairing'},
+    {k:'waiting_parts', l:'Parts'}, {k:'ready', l:'Ready'}, {k:'delivered', l:'Delivered'},
+  ];
+
+  return `
+    <input class="search" value="${escapeHtml(q)}" placeholder="Search by customer, phone or repair ID..." oninput="setSearch(this.value)">
+    <div class="filter-row">
+      ${defs.map(d=>`<div class="filter-chip ${currentFilter===d.k?'active':''}" onclick="setFilter('${d.k}')">${d.l}</div>`).join('')}
+    </div>
+    <div>${filtered.length===0 ? `<div class="empty">No repairs found.</div>` : filtered.map(renderCard).join('')}</div>
+  `;
+}
+
+function setSearch(v){ window._searchQ = v; renderMain(); document.getElementById('mainView').scrollTop; setTimeout(()=>{ const s=document.querySelector('.search'); if(s){ s.focus(); s.setSelectionRange(v.length,v.length);} },0); }
+function setFilter(f){ currentFilter=f; window._searchQ=''; renderMain(); }
+
+function renderCard(j){
+  const overdue = j.deliveryDate && j.status!=='delivered' && j.status!=='cancelled' && new Date(j.deliveryDate) < new Date(todayStr());
+  const thumb = j.photos && j.photos[0] ? `<img src="${j.photos[0]}">` : '📱';
+  return `
+    <div class="card" onclick="openDetail('${j.id}')">
+      <div class="card-top">
+        <div class="card-left">
+          <div class="thumb">${thumb}</div>
+          <div>
+            <div class="card-phone">${escapeHtml(j.brand)} ${escapeHtml(j.model)}</div>
+            <div class="card-id">${j.id} · ${escapeHtml(j.name)}</div>
+            <div class="card-issue">${escapeHtml(j.issue)||''}</div>
+          </div>
+        </div>
+        <div class="badge ${j.status}">${STAGE_LABEL[j.status]}</div>
+      </div>
+      <div class="card-time">${overdue?'⚠️ Overdue · ':''}${fmtTime(j.createdAt)} · ${fmtDate(j.createdAt)}</div>
+    </div>`;
+}
+
+/* ---- Add repair ---- */
+function openNewJob(){
+  pendingPhotos = [];
+  ['f_name','f_phone','f_model','f_imei','f_issue','f_accessories','f_cost','f_advance','f_delivery','f_tech'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f_brand').value='Samsung';
+  document.getElementById('f_condition').value='Good';
+  renderPhotoRow();
+  document.getElementById('addScreen').classList.add('open');
+}
+function closeAdd(){ document.getElementById('addScreen').classList.remove('open'); }
+
+function addPhotos(e){
+  const files = Array.from(e.target.files || []);
+  let remaining = files.length;
+  if(remaining===0) return;
+  files.forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{ pendingPhotos.push(reader.result); renderPhotoRow(); };
+    reader.readAsDataURL(file);
+  });
+  e.target.value='';
+}
+function removePhoto(i){ pendingPhotos.splice(i,1); renderPhotoRow(); }
+function renderPhotoRow(){
+  const row = document.getElementById('photoRow');
+  row.innerHTML = pendingPhotos.map((p,i)=>`
+    <div class="photo-thumb"><img src="${p}"><div class="rm" onclick="removePhoto(${i})">✕</div></div>
+  `).join('') + `<div class="add-photo" onclick="document.getElementById('photoInput').click()"><span class="ic">📷</span>Add Photo</div>`;
+}
+
+function saveJob(){
+  const name = document.getElementById('f_name').value.trim();
+  const phone = document.getElementById('f_phone').value.trim();
+  const brand = document.getElementById('f_brand').value;
+  const model = document.getElementById('f_model').value.trim();
+  if(!name || !phone || !model){ showToast('Please fill required fields (*)'); return; }
+
+  const job = {
+    id: nextJobId(),
+    name, phone, brand, model,
+    imei: document.getElementById('f_imei').value.trim(),
+    condition: document.getElementById('f_condition').value,
+    accessories: document.getElementById('f_accessories').value.trim(),
+    issue: document.getElementById('f_issue').value.trim(),
+    cost: document.getElementById('f_cost').value.trim(),
+    advance: document.getElementById('f_advance').value.trim(),
+    deliveryDate: document.getElementById('f_delivery').value,
+    tech: document.getElementById('f_tech').value.trim(),
+    photos: [...pendingPhotos],
+    status: 'received',
+    createdAt: Date.now(),
+    history: [{status:'received', at:Date.now()}]
+  };
+  jobs.push(job);
+  persist();
+  closeAdd();
+  currentFilter='home';
+  renderMain();
+  openWaScreen(job.id);
+}
+
+/* ---- Detail screen ---- */
+function openDetail(id){
+  activeJobId = id;
+  const j = jobs.find(j=>j.id===id);
+  if(!j) return;
+  const prevJobs = jobs.filter(o=>o.phone===j.phone && o.id!==j.id).sort((a,b)=>b.createdAt-a.createdAt);
+  const balance = (parseFloat(j.cost)||0) - (parseFloat(j.advance)||0);
+  const stageIdx = STAGES.indexOf(j.status);
+
+  const timeline = STAGES.map((s,i)=>{
+    const hist = j.history.find(h=>h.status===s);
+    const done = hist && j.status!=='cancelled';
+    const current = s===j.status;
+    return `<div class="tl-item">
+      <div class="tl-dot ${done?'done':''} ${current?'current':''}"></div>
+      <div><div class="tl-label">${STAGE_LABEL[s]}</div>${hist?`<div class="tl-time">${fmtDate(hist.at)}, ${fmtTime(hist.at)}</div>`:''}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="card" style="cursor:default">
+      <div class="card-top">
+        <div><div class="card-phone" style="font-size:16px">${j.id}</div><div class="card-id">${fmtDate(j.createdAt)} · ${fmtTime(j.createdAt)}</div></div>
+        <div class="badge ${j.status}">${STAGE_LABEL[j.status]}</div>
+      </div>
+    </div>
+
+    ${j.photos && j.photos.length ? `<div class="photo-row">${j.photos.map(p=>`<div class="photo-thumb"><img src="${p}"></div>`).join('')}</div>` : ''}
+
+    <div class="detail-row"><span>Customer</span><span>${escapeHtml(j.name)}</span></div>
+    <div class="detail-row"><span>Number</span><span>${escapeHtml(j.phone)}</span></div>
+    <div class="detail-row"><span>Device</span><span>${escapeHtml(j.brand)} ${escapeHtml(j.model)}</span></div>
+    ${j.imei ? `<div class="detail-row"><span>IMEI</span><span>${escapeHtml(j.imei)}</span></div>` : ''}
+    <div class="detail-row"><span>Problem</span><span>${escapeHtml(j.issue)||'—'}</span></div>
+    <div class="detail-row"><span>Condition</span><span>${escapeHtml(j.condition)||'—'}</span></div>
+    ${j.accessories ? `<div class="detail-row"><span>Accessories</span><span>${escapeHtml(j.accessories)}</span></div>` : ''}
+    <div class="detail-row"><span>Technician</span><span>${escapeHtml(j.tech)||'—'}</span></div>
+    <div class="detail-row"><span>Estimated Cost</span><span>₹${j.cost||0}</span></div>
+    <div class="detail-row"><span>Advance Paid</span><span>₹${j.advance||0}</span></div>
+    <div class="detail-row"><span>Balance</span><span>₹${balance}</span></div>
+    <div class="detail-row"><span>Expected Delivery</span><span>${j.deliveryDate||'—'}</span></div>
+
+    <div class="section-label">Update Status</div>
+    <select class="field" id="statusSelect" style="width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;" onchange="changeStatus('${j.id}', this.value)">
+      ${STAGES.concat(['cancelled']).map(s=>`<option value="${s}" ${s===j.status?'selected':''}>${STAGE_LABEL[s]}</option>`).join('')}
+    </select>
+
+    <div class="section-label">Status Timeline</div>
+    <div class="timeline">${timeline}</div>
+
+    <div class="section-label">Customer's Previous Repairs</div>
+    ${prevJobs.length===0 ? `<div style="color:var(--ink-dim); font-size:13px;">No previous repairs from this customer.</div>` :
+      prevJobs.map(p=>`<div class="history-item"><div class="h-top"><span>${escapeHtml(p.brand)} ${escapeHtml(p.model)}</span><span>₹${p.cost||0}</span></div><div class="h-sub">${escapeHtml(p.issue)||''} · ${STAGE_LABEL[p.status]} · ${p.id}</div></div>`).join('')
+    }
+
+    <div class="sheet-actions">
+      <button class="btn btn-cancel" onclick="deleteJob('${j.id}')">🗑 Delete</button>
+      <button class="btn btn-wa" onclick="openWaScreen('${j.id}')">💬 Send Update</button>
+    </div>
+  `;
+  document.getElementById('detailScreen').classList.add('open');
+}
+function closeDetail(){ document.getElementById('detailScreen').classList.remove('open'); renderMain(); }
+
+function changeStatus(id, status){
+  const j = jobs.find(j=>j.id===id);
+  if(!j) return;
+  j.status = status;
+  j.history.push({status, at:Date.now()});
+  persist();
+  openDetail(id);
+  showToast('Status updated to ' + STAGE_LABEL[status]);
+}
+
+function deleteJob(id){
+  if(!confirm('Delete this repair job?')) return;
+  jobs = jobs.filter(j=>j.id!==id);
+  persist();
+  closeDetail();
+}
+
+/* ---- WhatsApp screen ---- */
+function buildMessage(job){
+  const shopName = 'AtoZ Mobile Repairing';
+  let line = '';
+  switch(job.status){
+    case 'received': line = `Your ${job.brand} ${job.model} has been received at ${shopName}.\nCurrent status: Received\nWe will update you when the repair progresses.`; break;
+    case 'diagnosis': line = `Your ${job.brand} ${job.model} is currently under diagnosis.`; break;
+    case 'waiting_parts': line = `Your ${job.brand} ${job.model} repair is waiting on a spare part. We'll update you once it arrives.`; break;
+    case 'repairing': line = `Your ${job.brand} ${job.model} is now under repair.`; break;
+    case 'ready': line = `Good news! Your ${job.brand} ${job.model} repair is completed and ready for pickup.${job.cost ? `\nFinal amount: ₹${job.cost}` : ''}`; break;
+    case 'delivered': line = `Thank you for picking up your ${job.brand} ${job.model}. We hope the repair serves you well!`; break;
+    case 'cancelled': line = `Your repair request for ${job.brand} ${job.model} has been cancelled. Please contact us for details.`; break;
+  }
+  return `Hello ${job.name},\n${line}\n\nRepair ID: ${job.id}\nCurrent status: ${STAGE_LABEL[job.status]}\n\nThank you!\n${shopName}`;
+}
+
+function openWaScreen(id){
+  activeJobId = id;
+  const j = jobs.find(j=>j.id===id);
+  if(!j) return;
+  const msg = buildMessage(j);
+  document.getElementById('waContent').innerHTML = `
+    <div class="section-label">Sending update for</div>
+    <div class="card" style="cursor:default">
+      <div class="card-phone">${escapeHtml(j.brand)} ${escapeHtml(j.model)}</div>
+      <div class="card-id">${j.id} · ${escapeHtml(j.name)} · ${escapeHtml(j.phone)}</div>
+    </div>
+    <div class="section-label">Message Preview <span style="color:var(--ink-dim); font-weight:400; font-size:12px;">(matches current status: ${STAGE_LABEL[j.status]})</span></div>
+    <div class="msg-preview">${escapeHtml(msg)}</div>
+    <div class="char-count">${msg.length}/1024</div>
+    <div class="sheet-actions">
+      <button class="btn btn-cancel" onclick="closeWa()">Cancel</button>
+      <button class="btn btn-wa" onclick="sendWhatsApp('${j.id}')">💬 Open WhatsApp</button>
+    </div>
+  `;
+  document.getElementById('waScreen').classList.add('open');
+}
+function closeWa(){ document.getElementById('waScreen').classList.remove('open'); }
+
+function sendWhatsApp(id){
+  const job = jobs.find(j=>j.id===id);
+  if(!job) return;
+  let digits = job.phone.replace(/\D/g,'');
+  if(digits.length===10) digits = '91' + digits;
+  const msg = encodeURIComponent(buildMessage(job));
+  window.open(`https://wa.me/${digits}?text=${msg}`, '_blank');
+  closeWa();
+  showToast('Opening WhatsApp...');
+}
+
+function showToast(text){
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+loadJobs();
+currentFilter='home';
+renderMain();
+</script>
+</body>
+</html>
